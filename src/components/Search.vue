@@ -1,48 +1,20 @@
 <template>
   <div>
-
+    Search
   </div>
 </template>
 
 <script>
-import russian_names from '@/data/russian_names.json'
-import russian_surnames from '@/data/russian_surnames.json'
-
+  
+import rusToLat from '@/mixins/rusToLat.js'
+import api from '@/mixins/api.js'
 export default {
-  data: () => ({
-    loading: true
-  }),
-  methods: {
-    getDataNamesFromAPI(query) {
-      return new Promise((resolve, reject) => {
-        const items = this.dataNamesFromDB().find((e) => e.Name === query)
-        setTimeout(() => {
-          this.loading = false
-          resolve({
-            items
-          })
-        }, 1000)
-      })
-    },
-    getDataSureNamesFromAPI(query) {
-      return new Promise((resolve, reject) => {
-        const items = this.dataSurenamesFromDB().find(
-                (e) => e.Surname === query
-        )
-        setTimeout(() => {
-          this.loading = false
-          resolve({
-            items
-          })
-        }, 1000)
-      })
-    },
-    dataNamesFromDB() {
-      return russian_names
-    },
-    dataSurenamesFromDB() {
-      return russian_surnames
-    }
+
+  mixins: [api, rusToLat],
+  created() {
+    console.log(this.rusToLat('Антон Головачев'))
+    console.log(this.getDataNamesFromAPI('Антон'));
+    console.log(this.getDataSureNamesFromAPI('Головачев'))
   }
 }
 </script>
