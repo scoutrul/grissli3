@@ -1,5 +1,7 @@
 <template>
   <div>
+    <div v-if="loading">Loading</div>
+    <div v-if="error3more">{{ error3more }}</div>
     <div>
       <label>
         Поиск
@@ -45,12 +47,37 @@ export default {
     isToUpperCase: false,
     isToLowerCase: false,
     isToTranslit: false,
-    isToReverseText: false
+    isToReverseText: false,
+    searchResults: {
+      name: "",
+      surname: ""
+    },
+    timeout: null,
+    error3more: ""
   }),
-  created() {
-    console.log(this.rusToLat("Антон Головачев"));
-    // console.log(this.getDataNamesFromAPI('Антон'));
-    // console.log(this.getDataSureNamesFromAPI('Головачев'))
+  watch: {
+    searchInputValue(val, old) {
+      if (val.length < 3) {
+        this.error3more = "Должно быть больше 3х букв";
+        return;
+      } else {
+        this.error3more = "";
+
+        if (val !== old) {
+          // разбить val на name surname
+
+          if (this.timeout) clearTimeout(this.timeout);
+          this.timeout = setTimeout(async () => {
+            await this.getDataNamesFromAPI(val).then(res => {
+              this.searchResults.name = res;
+            });
+            await this.getDataSurNamesFromAPI(val).then(res => {
+              this.searchResults.surname = res;
+            });
+          }, 1000);
+        }
+      }
+    }
   },
   filters: {
     toUpperCase: (value, bool) => (bool ? value.toUpperCase() : value),
@@ -67,19 +94,4 @@ export default {
 };
 </script>
 
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
+<style scoped></style>

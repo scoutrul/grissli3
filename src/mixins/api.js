@@ -1,9 +1,13 @@
+import russian_names from "@/data/russian_names.json";
+import russian_surnames from "@/data/russian_surnames.json";
+
 export default {
   data: () => ({
-    loading: true
+    loading: false
   }),
   methods: {
     getDataNamesFromAPI(query) {
+      this.loading = true;
       return new Promise((resolve, reject) => {
         const items = this.dataNamesFromDB().find(e => e.Name === query);
         setTimeout(() => {
@@ -14,7 +18,8 @@ export default {
         }, 1000);
       });
     },
-    getDataSureNamesFromAPI(query) {
+    getDataSurNamesFromAPI(query) {
+      this.loading = true;
       return new Promise((resolve, reject) => {
         const items = this.dataSurnamesFromDB().find(e => e.Surname === query);
         setTimeout(() => {
@@ -26,10 +31,10 @@ export default {
       });
     },
     dataNamesFromDB() {
-      return () => import(`@/data/russian_names.json`);
+      return russian_names;
     },
     dataSurnamesFromDB() {
-      return () => import(`@/data/russian_surnames.json`);
+      return russian_surnames;
     }
   }
 };
