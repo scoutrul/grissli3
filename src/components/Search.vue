@@ -5,7 +5,11 @@
     <div>
       <label>
         Поиск
-        <input placeholder="Найти имена" v-model="searchInputValue" />
+        <input
+          placeholder="Найти имена"
+          v-model="searchInputValue"
+          debounce="500"
+        />
       </label>
       <hr />
       <label>
@@ -52,7 +56,6 @@ export default {
       name: "",
       surname: ""
     },
-    timeout: null,
     error3more: ""
   }),
   watch: {
@@ -65,16 +68,12 @@ export default {
 
         if (val !== old) {
           // разбить val на name surname
-
-          if (this.timeout) clearTimeout(this.timeout);
-          this.timeout = setTimeout(async () => {
-            await this.getDataNamesFromAPI(val).then(res => {
-              this.searchResults.name = res;
-            });
-            await this.getDataSurNamesFromAPI(val).then(res => {
-              this.searchResults.surname = res;
-            });
-          }, 1000);
+          await this.getDataNamesFromAPI(val).then(res => {
+            this.searchResults.name = res;
+          });
+          await this.getDataSurNamesFromAPI(val).then(res => {
+            this.searchResults.surname = res;
+          });
         }
       }
     }
