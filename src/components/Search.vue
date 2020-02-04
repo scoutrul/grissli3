@@ -8,7 +8,7 @@
         <input
           placeholder="Найти имена"
           v-model="searchInputValue"
-          debounce="500"
+          debounce="2000"
         />
       </label>
       <hr />
@@ -29,9 +29,19 @@
         isToReverseText
       </label>
     </div>
-    <div>
+    <div v-for="item in result.names" :key="item.Name">
       {{
-        searchInputValue
+        item.Name
+          | toUpperCase(isToUpperCase)
+          | toLowerCase(isToLowerCase)
+          | toTranslit(isToTranslit, rusToLat)
+          | toReverseText(isToReverseText)
+      }}
+    </div>
+    <div v-if="!result.surnames">...</div>
+    <div v-for="item in result.surnames" :key="item.Surname">
+      {{
+        item.Surname
           | toUpperCase(isToUpperCase)
           | toLowerCase(isToLowerCase)
           | toTranslit(isToTranslit, rusToLat)
@@ -52,14 +62,14 @@ export default {
     isToLowerCase: false,
     isToTranslit: false,
     isToReverseText: false,
-    searchResults: {
-      name: "",
-      surname: ""
+    result: {
+      names: [],
+      surnames: []
     },
     error3more: ""
   }),
   watch: {
-    searchInputValue(val, old) {
+    async searchInputValue(val, old) {
       if (val.length < 3) {
         this.error3more = "Должно быть больше 3х букв";
         return;
@@ -67,13 +77,16 @@ export default {
         this.error3more = "";
 
         if (val !== old) {
-          // разбить val на name surname
-          await this.getDataNamesFromAPI(val).then(res => {
-            this.searchResults.name = res;
+          const [name, surname] = val.split(" ");
+
+          await this.getDataNamesFromAPI({ name }).then(res => {
+            this.result.names = res;
           });
-          await this.getDataSurNamesFromAPI(val).then(res => {
-            this.searchResults.surname = res;
-          });
+          if (surname) {
+            await this.getDataSurNamesFromAPI({ surname }).then(res => {
+              this.result.surnames = res;
+            });
+          }
         }
       }
     }
