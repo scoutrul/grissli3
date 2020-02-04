@@ -90,16 +90,16 @@ export default {
           key: "names"
         }).then(res => {
           this.result.names = res;
-          surname &&
-            surname.length > 2 &&
-            this.getDataFromAPI({
-              data: this.db.surnames,
-              query: surname,
-              key: "surnames"
-            }).then(res => {
-              this.result.surnames = res;
-            });
         });
+        surname &&
+          surname.length > 2 &&
+          this.getDataFromAPI({
+            data: this.db.surnames,
+            query: surname,
+            key: "surnames"
+          }).then(res => {
+            this.result.surnames = res;
+          });
       }
     }
   },
