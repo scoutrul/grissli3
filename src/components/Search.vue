@@ -29,24 +29,30 @@
         isToReverseText
       </label>
     </div>
-    <div v-for="item in result.names" :key="item.Name">
-      {{
-        item.Name
-          | toUpperCase(isToUpperCase)
-          | toLowerCase(isToLowerCase)
-          | toTranslit(isToTranslit, rusToLat)
-          | toReverseText(isToReverseText)
-      }}
-    </div>
-    <div v-if="!result.surnames">...</div>
-    <div v-for="item in result.surnames" :key="item.Surname">
-      {{
-        item.Surname
-          | toUpperCase(isToUpperCase)
-          | toLowerCase(isToLowerCase)
-          | toTranslit(isToTranslit, rusToLat)
-          | toReverseText(isToReverseText)
-      }}
+    <div style="display: flex; flex-direction: row">
+      <div>
+        <div v-for="item in result.names" :key="item.id">
+          {{
+            item.Name
+              | toUpperCase(isToUpperCase)
+              | toLowerCase(isToLowerCase)
+              | toTranslit(isToTranslit, rusToLat)
+              | toReverseText(isToReverseText)
+          }}
+        </div>
+      </div>
+      <div v-if="!result.surnames.length">...</div>
+      <div>
+        <div v-for="item in result.surnames" :key="item.id">
+          {{
+            item.Surname
+              | toUpperCase(isToUpperCase)
+              | toLowerCase(isToLowerCase)
+              | toTranslit(isToTranslit, rusToLat)
+              | toReverseText(isToReverseText)
+          }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -69,39 +75,52 @@ export default {
     error3more: ""
   }),
   watch: {
-    async searchInputValue(val, old) {
+    searchInputValue(val, old) {
+      if (val.trim() === old.trim()) return;
       if (val.length < 3) {
         this.error3more = "Должно быть больше 3х букв";
         return;
       } else {
         this.error3more = "";
 
-        if (val !== old) {
-          const [name, surname] = val.split(" ");
-
-          await this.getDataNamesFromAPI({ name }).then(res => {
-            this.result.names = res;
-          });
-          if (surname) {
-            await this.getDataSurNamesFromAPI({ surname }).then(res => {
+        const [name, surname] = val.split(" ");
+        this.getDataFromAPI({
+          data: this.db.names,
+          query: name,
+          key: "names"
+        }).then(res => {
+          this.result.names = res;
+          surname &&
+            surname.length > 2 &&
+            this.getDataFromAPI({
+              data: this.db.surnames,
+              query: surname,
+              key: "surnames"
+            }).then(res => {
               this.result.surnames = res;
             });
-          }
-        }
+        });
       }
     }
   },
   filters: {
-    toUpperCase: (value, bool) => (bool ? value.toUpperCase() : value),
-    toLowerCase: (value, bool) => (bool ? value.toLowerCase() : value),
-    toTranslit: (value, bool, rusToLat) => (bool ? rusToLat(value) : value),
-    toReverseText: (value, bool) =>
-      bool
+    toUpperCase(value, bool) {
+      return bool ? value.toUpperCase() : value;
+    },
+    toLowerCase(value, bool) {
+      return bool ? value.toLowerCase() : value;
+    },
+    toTranslit(value, bool, rusToLat) {
+      return bool ? rusToLat(value) : value;
+    },
+    toReverseText(value, bool) {
+      return bool
         ? value
             .split("")
             .reverse()
             .join("")
-        : value
+        : value;
+    }
   }
 };
 </script>

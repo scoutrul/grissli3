@@ -1,6 +1,5 @@
 import russian_names from "@/data/russian_names.json";
 import russian_surnames from "@/data/russian_surnames.json";
-
 export default {
   data: () => ({
     loading: false,
@@ -9,66 +8,48 @@ export default {
       surnames: []
     }
   }),
-  async mounted() {
-    this.db.names = await this.dataNamesFromDB();
-    this.db.surnames = await this.dataSurnamesFromDB();
-  },
-  computed: {
-    filterData() {
-      const buffer = [];
-      return ({ data, query }) => {
-        // if (!this.loading) {
-        //   for (let i = 0; i < data.length; i++) {
-        //     if (
-        //       data[i].Name &&
-        //       data[i].Name.toLowerCase().indexOf(query.toLowerCase() == 0)
-        //     ) {
-        //       buffer.push(data[i]);
-        //     }
-        //     if (
-        //       data[i].Surname &&
-        //       data[i].Surname.toLowerCase().indexOf(query.toLowerCase() == 0)
-        //     ) {
-        //       buffer.push(data[i]);
-        //     }
-        //   }
-        // }
-        // return buffer;
-        const items = data.find(e => e.Name === query);
-      };
-    }
+  created() {
+    this.db.names = this.dataNamesFromDB();
+    this.db.surnames = this.dataSurnamesFromDB();
   },
 
   methods: {
-    async getDataNamesFromAPI({ name }) {
-      this.loading = true;
-      const data = this.db.names;
-      const asyncNames = await this.filterData({ data, name });
-
-      await setTimeout(async () => {
-        this.loading = false;
-        return asyncNames;
-      }, 1000);
+    filterData({ data, query, key }) {
+      const names = [];
+      const surnames = [];
+      if (key === "names") {
+        for (let i = 0; i < data.length; i++) {
+          if (~data[i].Name.toLowerCase().indexOf(query.toLowerCase())) {
+            names.push(data[i]);
+          }
+        }
+        return names;
+      }
+      if (key === "surnames") {
+        for (let i = 0; i < data.length; i++) {
+          if (~data[i].Surname.toLowerCase().indexOf(query.toLowerCase())) {
+            surnames.push(data[i]);
+          }
+        }
+        return surnames;
+      }
     },
-    async getDataSurNamesFromAPI({ surname }) {
+    getDataFromAPI({ data, query, key }) {
+      if (!query || !key) return;
       this.loading = true;
-      const data = this.db.surnames;
-      const asyncSurnames = await this.filterData({ data, surname });
-
+      const result = this.filterData({ data, query, key });
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           this.loading = false;
-          return asyncSurnames;
+          resolve(result);
         }, 1000);
       });
     },
-    async dataNamesFromDB() {
-      const data = await import("@/data/russian_names.json");
+    dataNamesFromDB() {
       return russian_names;
     },
-    async dataSurnamesFromDB() {
-      const data = await import("@/data/russian_surnames.json");
-      return data;
+    dataSurnamesFromDB() {
+      return russian_surnames;
     }
   }
 };
